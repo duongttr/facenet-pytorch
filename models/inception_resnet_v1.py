@@ -294,14 +294,18 @@ class InceptionResnetV1(nn.Module):
         x = self.avgpool_1a(x)
         x = self.dropout(x)
         x = self.last_linear(x.view(x.shape[0], -1))
-        x = self.last_bn(x)
+        
+        features = self.last_bn(x)
 
         logits = None
         if return_additional_logits:
             logits = self.logits(x)
-        features = F.normalize(x, p=2, dim=1)
+        # features = F.normalize(x, p=2, dim=1)
 
         return {'features': features, 'logits': logits}
+    
+    def forward_features_to_logits_only(self, features):
+        return self.logits(features)
 
 
 def load_weights(mdl, name):
