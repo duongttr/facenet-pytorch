@@ -269,7 +269,7 @@ class InceptionResnetV1(nn.Module):
             self.device = device
             self.to(device)
 
-    def forward(self, x):
+    def forward(self, x, return_additional_logits=False):
         """Calculate embeddings or logits given a batch of input image tensors.
 
         Arguments:
@@ -295,11 +295,13 @@ class InceptionResnetV1(nn.Module):
         x = self.dropout(x)
         x = self.last_linear(x.view(x.shape[0], -1))
         x = self.last_bn(x)
-        if self.classify:
-            x = self.logits(x)
-        else:
-            x = F.normalize(x, p=2, dim=1)
-        return x
+
+        logits = None
+        if return_additional_logits:
+            logits = self.logits(x)
+        features = F.normalize(x, p=2, dim=1)
+
+        return {'features': features, 'logits': logits}
 
 
 def load_weights(mdl, name):
